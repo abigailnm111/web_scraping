@@ -24,7 +24,7 @@ description=soup.find('div', {'id':'descriptionTab'})
 
 class PatternsSpider(scrapy.Spider):
     name ='paterns_spider'
-    start_urls=['https://somethingdelightful.com/m8200']
+    start_urls=['https://somethingdelightful.com/mccalls/misses/tops/']
     def parse(self, response):
         SET_SELECTOR= '#productDescriptionInline'
         for pattern in response.css(SET_SELECTOR):
@@ -36,6 +36,10 @@ class PatternsSpider(scrapy.Spider):
                 'fabric':pattern.css(FABRIC_SELECTOR).extract_first(),
                 'notions': pattern.css(NOTIONS_SELECTOR).extract_first(),
                 }
+            
+        next_page= response.css('figure.card-figure a::attr(href)').get()
+        if next_page is not None:
+            yield scrapy.Request(next_page, callback=self.parse)
 
 
 
