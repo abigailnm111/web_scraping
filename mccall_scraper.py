@@ -26,6 +26,16 @@ class PatternsSpider(scrapy.Spider):
     name ='paterns_spider'
     start_urls=['https://somethingdelightful.com/mccalls/misses/tops/']
     def parse(self, response):
+        find_pattern= response.css('h4.card-title a::attr(href)').getall()
+        
+        for pattern in find_pattern: 
+            yield scrapy.Request(pattern, callback=self.description_parse)
+            
+        next_page= response.css("li.leans-right__item.leans-right__item--next a::attr(href)").get()
+        if next_page is not None:
+            yield scrapy.Request(next_page, callback=self.parse)
+
+    def description_parse(self, response):
         SET_SELECTOR= '#productDescriptionInline'
         for pattern in response.css(SET_SELECTOR):
             DESCRIPTION_SELECTOR= '#descriptionTab::text'
@@ -36,11 +46,6 @@ class PatternsSpider(scrapy.Spider):
                 'fabric':pattern.css(FABRIC_SELECTOR).extract_first(),
                 'notions': pattern.css(NOTIONS_SELECTOR).extract_first(),
                 }
-            
-        next_page= response.css('figure.card-figure a::attr(href)').get()
-        if next_page is not None:
-            yield scrapy.Request(next_page, callback=self.parse)
-
 
 
 #<article id="productDescriptionInline">
@@ -48,4 +53,4 @@ class PatternsSpider(scrapy.Spider):
 
 # span class="sewing-rating">
 
-#div class="form-field option--size"
+#div class="form-field option--size"#product-listing-container > 
