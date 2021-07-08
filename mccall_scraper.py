@@ -23,7 +23,7 @@ description=soup.find('div', {'id':'descriptionTab'})
 #print(description)
 
 class PatternsSpider(scrapy.Spider):
-    name ='paterns_spider'
+    name ='pattern_spider'
     start_urls=['https://somethingdelightful.com/mccalls/misses/tops/']
     def parse(self, response):
         find_pattern= response.css('h4.card-title a::attr(href)').getall()
@@ -37,11 +37,18 @@ class PatternsSpider(scrapy.Spider):
 
     def description_parse(self, response):
         SET_SELECTOR= '#productDescriptionInline'
+        
+        
         for pattern in response.css(SET_SELECTOR):
+            NAME_SELECTOR= '.productView-title::text'
+            ALT_DESCRIPTION_SELECTOR= '.productView-altTitle::text'
             DESCRIPTION_SELECTOR= '#descriptionTab::text'
             FABRIC_SELECTOR= '#fabricsTab::text'
             NOTIONS_SELECTOR= '#notionsTab::text'
             yield{
+                
+                #'name':response.css(NAME_SELECTOR).extract_first(),
+               # 'alt_description': response.css(ALT_DESCRIPTION_SELECTOR).extract_first(),
                 'description': pattern.css(DESCRIPTION_SELECTOR).extract_first(),
                 'fabric':pattern.css(FABRIC_SELECTOR).extract_first(),
                 'notions': pattern.css(NOTIONS_SELECTOR).extract_first(),
