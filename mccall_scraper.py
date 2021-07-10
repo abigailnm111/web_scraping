@@ -8,34 +8,43 @@ Created on Tue Jun 29 10:26:25 2021
 import scrapy
 from scrapy.item import Item, Field
 from scrapy.loader import ItemLoader
+from itemloaders.processors import TakeFirst, MapCompose
 
 
-from urllib import request
-from bs4 import BeautifulSoup
+import re
 
-url=request.urlopen('https://somethingdelightful.com/m8200')
-soup= BeautifulSoup(url, 'html.parser')
-html=soup.prettify()
+def line_filter_out(x):
+   
+     l1= re.sub(r"\r\n",'', x)
+     line=re.sub(r"\n", '', l1)
+        
+     return line
 
-description=soup.find('div', {'id':'descriptionTab'})
-#soup('descriptionTab')
-#f= open('html.txt', "w")
-#f.write(html)
-#f.close()
 
-#print(description)
 
-class PatternSpiderPipline(object):
-      def process_item(self, item, spider):
-        return item                     
+# class PatternSpiderPipline(object):
+#       def process_item(self, item, spider):
+#         return item                     
 
 class Pattern(Item):
-    name= Field()
-    alt_desc= Field()
-    description=Field()
-    fabric= Field()
-    notions= Field()
-    sizes= Field()
+    name= Field(
+        output_processor=TakeFirst(),
+        )
+    alt_desc= Field(
+        input_processor= MapCompose(line_filter_out),
+                    )
+    description=Field(
+        input_processor= MapCompose(line_filter_out),
+        )
+    fabric= Field(
+        input_processor= MapCompose(line_filter_out),
+        )
+    notions= Field(
+        input_processor= MapCompose(line_filter_out),
+                   )
+    sizes= Field(
+        input_processor= MapCompose(line_filter_out),
+                 )
     
 
 class PatternsSpider(scrapy.Spider):
