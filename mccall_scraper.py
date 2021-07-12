@@ -72,13 +72,22 @@ def fabric_clean(x):
 # def notions_clean(x):
 #     line=re.sub("NOTIONS:",'', x)
     
-    
-# def sizes_clean(x):
-#     line=re.sub("Size\sCombinations",'', x)
-    
+  
+def sizes_clean(x):
+    line=re.sub("Size\sCombinations:",'', x)
+    if line== " ":
+        new= None
+    else:
+        new= re.findall('\((.+?)\)', line)
+    return new
+      
 # def clean_lists(x):
     
-    
+def comma_splits(x):
+    new= []
+   
+      
+    return new
     
 
 # class PatternSpiderPipline(object):
@@ -101,13 +110,14 @@ class Pattern(Item):
         )
     fabric= Field(
         input_processor= MapCompose(line_clean, fabric_clean),
-        #output_processor=Compose(lambda x: x[0], str.split(",") )
+        #output_processor=Compose(lambda x: x[0], str.split(","), )
         )
     notions= Field(
         input_processor= MapCompose(line_clean),
                    )
     sizes= Field(
-        input_processor= MapCompose(line_clean),
+        input_processor= MapCompose(line_clean, sizes_clean),
+        output_processor=Compose(comma_splits)
                  )
     
 
@@ -120,9 +130,9 @@ class PatternsSpider(scrapy.Spider):
         for pattern in find_pattern: 
             yield scrapy.Request(pattern, callback=self.description_parse)
             
-        next_page= response.css("li.leans-right__item.leans-right__item--next a::attr(href)").get()
-        if next_page is not None:
-            yield scrapy.Request(next_page, callback=self.parse)
+        # next_page= response.css("li.leans-right__item.leans-right__item--next a::attr(href)").get()
+        # if next_page is not None:
+        #     yield scrapy.Request(next_page, callback=self.parse)
 
     def description_parse(self, response):
 
