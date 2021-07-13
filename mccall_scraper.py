@@ -19,7 +19,8 @@ def line_clean(x):
      line=re.sub(r"\n", '', l1)
      if line==' ':
          line== None
-
+     line= line.lstrip(" ")
+     
      
      return line
 
@@ -36,7 +37,32 @@ def audiance_determination(x):
 
     return new
 
+def garment_features(x):
+   #Tops/dresses/jackets/
+   #sweatheart_neckline
+   #cowl_neck
+   #square_neck
+    #V-neck
+    #princess_seams
+    #peplum
+    #bubble
+    #baby_doll
+     #pullover
+     #cowl_sleeve
+      #pleated sleeve
+    #dolman
+    #sleeveless
+    #puff_sleeve: puff-sleeve, puff 
+    
+    
+     #pants/shorts/skirts
+     #highwaist
+    
 
+   #all
+    #wrap
+    #shirred
+    #ruffled:ruffle
 
 def garment_type_determination(x):
     new=[]
@@ -63,11 +89,17 @@ def garment_type_determination(x):
         
 def fabric_clean(x):
 
-    line= re.sub("[*].+|FABRICS:",'', x)
-    if line== ' ':
-        line= None
-    return line
-        
+     line= re.sub("[*].+|FABRICS:|\.",'', x)
+     
+     if line== '' or line== ' ':
+         new= None
+     else:
+        new=re.findall('(.+,.+)', line)
+        if new==[]:
+            new=None
+      
+     return new
+
 
 # def notions_clean(x):
 #     line=re.sub("NOTIONS:",'', x)
@@ -84,11 +116,12 @@ def sizes_clean(x):
 # def clean_lists(x):
     
 def comma_splits(x):
-    new= []
-   
-      
+    if type(x)== str:
+        new= x.split(', ')
+    else:
+        new= [i.split(', ') for i in x]
     return new
-    
+
 
 # class PatternSpiderPipline(object):
 #       def process_item(self, item, spider):
@@ -110,14 +143,14 @@ class Pattern(Item):
         )
     fabric= Field(
         input_processor= MapCompose(line_clean, fabric_clean),
-        #output_processor=Compose(lambda x: x[0], str.split(","), )
+        output_processor=Compose(lambda v: v[0],comma_splits)
         )
     notions= Field(
         input_processor= MapCompose(line_clean),
                    )
     sizes= Field(
         input_processor= MapCompose(line_clean, sizes_clean),
-        output_processor=Compose(comma_splits)
+        
                  )
     
 
