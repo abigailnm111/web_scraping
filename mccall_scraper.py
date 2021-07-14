@@ -38,31 +38,19 @@ def audiance_determination(x):
     return new
 
 def garment_features(x):
-   #Tops/dresses/jackets/
-   #sweatheart_neckline
-   #cowl_neck
-   #square_neck
-    #V-neck
-    #princess_seams
-    #peplum
-    #bubble
-    #baby_doll
-     #pullover
-     #cowl_sleeve
-      #pleated sleeve
-    #dolman
-    #sleeveless
-    #puff_sleeve: puff-sleeve, puff 
-    
-    
-     #pants/shorts/skirts
-     #highwaist
-    
+ 
+   descriptors=['sweatheart', 'cowl', 'square', 'V-neck', 'princess seam', 'peplum', 'bubble', 'baby doll', 'pull.*over', 
+                'pleat', 'dolman', 'sleeveless', 'puff', 'highwaist', 'wrap', 'shirr', 'ruffle', 'gathered', 'blouson',
+                'tiered', 'fit.+flare', 'raglan', 'ruch'
+                ]
+   new=[]
+   for d in descriptors:
+       add=re.search(f'{d}',x )
+       if add != None:
+           new.append(add.group())
+   return new
+       
 
-   #all
-    #wrap
-    #shirred
-    #ruffled:ruffle
 
 def garment_type_determination(x):
     new=[]
@@ -113,7 +101,7 @@ def sizes_clean(x):
         new= re.findall('\((.+?)\)', line)
     return new
       
-# def clean_lists(x):
+
     
 def comma_splits(x):
     if type(x)== str:
@@ -139,19 +127,23 @@ class Pattern(Item):
         input_processor= MapCompose(line_clean, garment_type_determination),
                     )
     description=Field(
-        input_processor= MapCompose(line_clean),
+        input_processor= MapCompose(line_clean, garment_features),
         )
     fabric= Field(
         input_processor= MapCompose(line_clean, fabric_clean),
         output_processor=Compose(lambda v: v[0],comma_splits)
         )
-    notions= Field(
-        input_processor= MapCompose(line_clean),
-                   )
+
+    # notions= Field(
+    #     input_processor= MapCompose(line_clean),
+    #               )
     sizes= Field(
         input_processor= MapCompose(line_clean, sizes_clean),
         
                  )
+    url=Field(
+        output_processor= TakeFirst(),
+        )
     
 
 class PatternsSpider(scrapy.Spider):
@@ -173,8 +165,9 @@ class PatternsSpider(scrapy.Spider):
             ALT_DESCRIPTION_SELECTOR= '.productView-altTitle::text'
             DESCRIPTION_SELECTOR= '//div[@id="descriptionTab"]//text()' 
             FABRIC_SELECTOR= '//div[@id="fabricsTab"]//text()'
-            NOTIONS_SELECTOR= '//div[@id="notionsTab"]//text()'
+            # NOTIONS_SELECTOR= '//div[@id="notionsTab"]//text()'
             SIZE_SELECTOR= '//div[@id="sizeTab"]//text()'
+            
             
             p=ItemLoader(item=Pattern(), response=response)
             p.add_css('name',NAME_SELECTOR)
@@ -182,8 +175,9 @@ class PatternsSpider(scrapy.Spider):
             p.add_css('garment_type', ALT_DESCRIPTION_SELECTOR)
             p.add_xpath('description', DESCRIPTION_SELECTOR)
             p.add_xpath('fabric', FABRIC_SELECTOR)
-            p.add_xpath('notions', NOTIONS_SELECTOR)
+            # p.add_xpath('notions', NOTIONS_SELECTOR)
             p.add_xpath('sizes', SIZE_SELECTOR)
+            p.add_value('url', response.url)
             print(p.load_item())
 
 
