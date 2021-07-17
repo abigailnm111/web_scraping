@@ -126,11 +126,15 @@ class Pattern(Item):
     url=Field(
         output_processor= TakeFirst(),
         )
+    brand=Field(
+        output_processor=TakeFirst(),
+        )
     
 
 class PatternsSpider(scrapy.Spider):
     name ='pattern_spider'
     start_urls=['https://somethingdelightful.com/mccalls/misses/tops/']
+    
     def parse(self, response):
         find_pattern= response.css('h4.card-title a::attr(href)').getall()
         
@@ -142,7 +146,7 @@ class PatternsSpider(scrapy.Spider):
         #     yield scrapy.Request(next_page, callback=self.parse)
 
     def description_parse(self, response):
-
+            brand='McCalls'
             NAME_SELECTOR= '.productView-title::text'
             ALT_DESCRIPTION_SELECTOR= '.productView-altTitle::text'
             DESCRIPTION_SELECTOR= '//div[@id="descriptionTab"]//text()' 
@@ -160,6 +164,7 @@ class PatternsSpider(scrapy.Spider):
             # p.add_xpath('notions', NOTIONS_SELECTOR)
             p.add_xpath('sizes', SIZE_SELECTOR)
             p.add_value('url', response.url)
+            p.add_value('brand', brand)
             return p.load_item()
             
 

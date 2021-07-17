@@ -16,5 +16,28 @@ user= 'postgres',
 password= '***')
 
 class PatternSpiderPipeline:
+    
+    def open_spider(self, spider):
+        self.conn= psycopg2.connect(
+        host= 'localhost',
+        database= 'patterndb',
+        user= 'postgres',
+        password= 'clown')
+        self.cursor=self.conn.cursor()
+        
+    def close_spider(self, spider):
+        self.cursor.close()
+        self.conn.close()
+        
     def process_item(self, item, spider):
+        self.cursor.execute(
+            """
+            INSERT INTO pattern(brand, url, name)
+            VALUES (%s,%s,%s)
+            ON CONFLICT ON CONSTRAINT unique_name_brand DO NOTHING
+            """,
+            (item['brand'], item['url'], item['name'])
+            )
+            
+        self.conn.commit()
         return item
