@@ -10,8 +10,8 @@ from scrapy.item import Item, Field
 from scrapy.loader import ItemLoader
 from itemloaders.processors import TakeFirst, MapCompose, Compose
 
-
 import re
+
 
 def line_clean(x):
    
@@ -20,8 +20,6 @@ def line_clean(x):
      if line==' ':
          line== None
      line= line.lstrip(" ")
-     
-     
      return line
 
 def audiance_determination(x):
@@ -34,7 +32,6 @@ def audiance_determination(x):
         new.append("Petite")
     if new==[]:
         new.append('Unknown')
-
     return new
 
 def garment_features(x):
@@ -49,8 +46,6 @@ def garment_features(x):
        if add != None:
            new.append(add.group())
    return new
-       
-
 
 def garment_type_determination(x):
     new=[]
@@ -73,8 +68,7 @@ def garment_type_determination(x):
     if re.findall("Jumpsuit|Romper|Overalls",x):
         new.append("Jumpsuit/Romper/Overalls")
     return new
-        
-        
+          
 def fabric_clean(x):
 
      line= re.sub("[*].+|FABRICS:|\.",'', x)
@@ -85,9 +79,7 @@ def fabric_clean(x):
         new=re.findall('(.+,.+)', line)
         if new==[]:
             new=None
-      
      return new
-
 
 # def notions_clean(x):
 #     line=re.sub("NOTIONS:",'', x)
@@ -100,20 +92,13 @@ def sizes_clean(x):
     else:
         new= re.findall('\((.+?)\)', line)
     return new
-      
 
-    
 def comma_splits(x):
     if type(x)== str:
         new= x.split(', ')
     else:
         new= [i.split(', ') for i in x]
-    return new
-
-
-# class PatternSpiderPipline(object):
-#       def process_item(self, item, spider):
-#         return item                     
+    return new 
 
 class Pattern(Item):
     name= Field(
@@ -121,11 +106,10 @@ class Pattern(Item):
         )
     audiance=Field(
         input_processor= MapCompose(line_clean, audiance_determination),
-        
         )
     garment_type= Field(
         input_processor= MapCompose(line_clean, garment_type_determination),
-                    )
+        )
     description=Field(
         input_processor= MapCompose(line_clean, garment_features),
         )
@@ -133,14 +117,12 @@ class Pattern(Item):
         input_processor= MapCompose(line_clean, fabric_clean),
         output_processor=Compose(lambda v: v[0],comma_splits)
         )
-
     # notions= Field(
-    #     input_processor= MapCompose(line_clean),
-    #               )
+    #   input_processor= MapCompose(line_clean),
+    #   )
     sizes= Field(
         input_processor= MapCompose(line_clean, sizes_clean),
-        
-                 )
+        )
     url=Field(
         output_processor= TakeFirst(),
         )
@@ -178,8 +160,8 @@ class PatternsSpider(scrapy.Spider):
             # p.add_xpath('notions', NOTIONS_SELECTOR)
             p.add_xpath('sizes', SIZE_SELECTOR)
             p.add_value('url', response.url)
-            print(p.load_item())
-
+            return p.load_item()
+            
 
 #<article id="productDescriptionInline">
 # sub sections of article above: id="descriptionTab" id="fabricsTab" id="notionsTab" id="sizeTab"
