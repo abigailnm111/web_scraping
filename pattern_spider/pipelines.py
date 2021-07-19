@@ -13,7 +13,18 @@ conn= psycopg2.connect(
 host= 'localhost',
 database= 'patterndb',
 user= 'postgres',
-password= '***')
+password= 'clown')
+
+item=['Adult']
+cursor=conn.cursor()
+cursor.execute(
+ """
+ INSERT INTO audiance(audiance_type)
+ VALUES(%s)
+ """,
+ ('Adult',)
+ )
+conn.commit()
 
 class PatternSpiderPipeline:
     
@@ -38,6 +49,22 @@ class PatternSpiderPipeline:
             """,
             (item['brand'], item['url'], item['name'])
             )
-            
         self.conn.commit()
+        for i in item['audiance']: 
+            self.cursor.execute(
+                """
+                INSERT INTO audiance(audiance_type)
+                VALUES(%s)
+                """,
+                (i,)
+                )
+            self.conn.commit()
+            #fields:
+            #audiance
+            #garment_type
+            #description
+            #fabric
+            #sizes
+            
         return item
+    
