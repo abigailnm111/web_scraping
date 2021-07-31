@@ -14,7 +14,6 @@ import re
 
 
 def line_clean(x):
-   
      l1= re.sub(r"\r\n",'', x)
      line=re.sub(r"\n", '', l1)
      if line==' ':
@@ -35,7 +34,6 @@ def audiance_determination(x):
     return new
 
 def garment_features(x):
- 
    descriptors=['sweatheart', 'cowl', 'square', 'V-neck', 'princess seam', 'peplum', 'bubble', 'baby doll', 'pull.*over', 
                 'pleat', 'dolman', 'sleeveless', 'puff', 'highwaist', 'wrap', 'shirr', 'ruffle', 'gathered', 'blouson',
                 'tiered', 'fit.+flare', 'raglan', 'ruch'
@@ -70,9 +68,7 @@ def garment_type_determination(x):
     return new
           
 def fabric_clean(x):
-
      line= re.sub("[*].+|FABRICS:|\.",'', x)
-     
      if line== '' or line== ' ':
          new= None
      else:
@@ -137,13 +133,11 @@ class PatternsSpider(scrapy.Spider):
     
     def parse(self, response):
         find_pattern= response.css('h4.card-title a::attr(href)').getall()
-        
         for pattern in find_pattern: 
             yield scrapy.Request(pattern, callback=self.description_parse)
-            
-        # next_page= response.css("li.leans-right__item.leans-right__item--next a::attr(href)").get()
-        # if next_page is not None:
-        #     yield scrapy.Request(next_page, callback=self.parse)
+        next_page= response.css("li.leans-right__item.leans-right__item--next a::attr(href)").get()
+        if next_page is not None:
+            yield scrapy.Request(next_page, callback=self.parse)
 
     def description_parse(self, response):
             brand='McCalls'
@@ -153,8 +147,6 @@ class PatternsSpider(scrapy.Spider):
             FABRIC_SELECTOR= '//div[@id="fabricsTab"]//text()'
             # NOTIONS_SELECTOR= '//div[@id="notionsTab"]//text()'
             SIZE_SELECTOR= '//div[@id="sizeTab"]//text()'
-            
-            
             p=ItemLoader(item=Pattern(), response=response)
             p.add_css('name',NAME_SELECTOR)
             p.add_css('audiance', ALT_DESCRIPTION_SELECTOR)
