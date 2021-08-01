@@ -43,6 +43,8 @@ def garment_features(x):
        add=re.search(f'{d}',x )
        if add != None:
            new.append(add.group())
+   if new==[]:
+       new.append(None)
    return new
 
 def garment_type_determination(x):
@@ -135,9 +137,9 @@ class PatternsSpider(scrapy.Spider):
         find_pattern= response.css('h4.card-title a::attr(href)').getall()
         for pattern in find_pattern: 
             yield scrapy.Request(pattern, callback=self.description_parse)
-        next_page= response.css("li.leans-right__item.leans-right__item--next a::attr(href)").get()
-        if next_page is not None:
-            yield scrapy.Request(next_page, callback=self.parse)
+        # next_page= response.css("li.leans-right__item.leans-right__item--next a::attr(href)").get()
+        # if next_page is not None:
+        #     yield scrapy.Request(next_page, callback=self.parse)
 
     def description_parse(self, response):
             brand='McCalls'

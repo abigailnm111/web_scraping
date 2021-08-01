@@ -80,7 +80,7 @@ class PatternSpiderPipeline:
                 (row_id[0], i)
                 )
             self.conn.commit()
-        for i in item["sizes"]:
+        for i in item['sizes']:
             s_item=[s for s in i.split("-")]
             for s in s_item:
                 self.cursor.execute(
@@ -91,6 +91,18 @@ class PatternSpiderPipeline:
                    """,
                    (row_id[0], s)
                    )
+                self.conn.commit()
+        if item['description'][0]!= None:
+            for i in item['description']:
+                self.cursor.execute(
+                    """
+                    INSERT INTO garment_features(id, garment_feature)
+                    VALUES(%s, %s)
+                    ON CONFLICT (id, garment_feature) DO NOTHING
+                    """,
+                    (row_id[0], i)
+                    )
+                self.conn.commit()
             #fields to add:
             #description
         return item
