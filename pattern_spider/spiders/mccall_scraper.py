@@ -63,10 +63,12 @@ def garment_type_determination(x):
         new.append("Vest")
     if re.findall("Cardigan|Sweater",x):
         new.append("Cardigan/Sweater")
-    if re.findall("Jacket|Coat|Hoodie",x):
+    if re.findall("Jacket|Coat|Hoodie|Poncho",x):
         new.append("Jacket/Coat")
     if re.findall("Jumpsuit|Romper|Overalls",x):
         new.append("Jumpsuit/Romper/Overalls")
+    if new==[]:
+        new.append("Not Available")
     return new
           
 def fabric_clean(x):
@@ -76,7 +78,7 @@ def fabric_clean(x):
      else:
         new=re.findall('(.+,.+)', line)
         if new==[]:
-            new=None
+            new=[None]
      return new
 
 # def notions_clean(x):
@@ -98,6 +100,18 @@ def comma_splits(x):
         new= [i.split(', ') for i in x]
     return new 
 
+def fabric_output(x):
+    new=none_output(x)
+    if new!= []:
+        new=comma_splits(x)
+    return new
+
+
+def none_output(x):
+    new=[i for i in x if i!=None]
+    return new
+
+
 class Pattern(Item):
     name= Field(
         output_processor=TakeFirst(),
@@ -110,10 +124,11 @@ class Pattern(Item):
         )
     description=Field(
         input_processor= MapCompose(line_clean, garment_features),
+        output_processor=Compose(none_output)
         )
     fabric= Field(
         input_processor= MapCompose(line_clean, fabric_clean),
-        output_processor=Compose(lambda v: v[0],comma_splits)
+        output_processor=Compose(lambda v: v[0] if(v[0]!=None)else [None], fabric_output)
         )
     # notions= Field(
     #   input_processor= MapCompose(line_clean),
@@ -131,9 +146,16 @@ class Pattern(Item):
 
 class PatternsSpider(scrapy.Spider):
     name ='pattern_spider'
-    start_urls=['https://somethingdelightful.com/mccalls/misses/tops/']
+    start_urls=['https://somethingdelightful.com/mccalls/misses']
     
     def parse(self, response):
+        find_category=response.css('div.category__subcat-grid-item a::attr(href)').getall()
+        for c in find_category:
+            yield scrapy.Request(c, callback=self.category_parse)
+            
+        
+        
+    def category_parse(self, response):
         find_pattern= response.css('h4.card-title a::attr(href)').getall()
         for pattern in find_pattern: 
             yield scrapy.Request(pattern, callback=self.description_parse)

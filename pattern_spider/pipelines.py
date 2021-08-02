@@ -60,16 +60,17 @@ class PatternSpiderPipeline:
                 (row_id[0],i)
                 )
             self.conn.commit()
-        for i in item['fabric']:
-            self.cursor.execute(
-                """
-                INSERT INTO fabrics(id, fabric)
-                VALUES(%s, %s)
-                ON CONFLICT (id, fabric) DO NOTHING
-                """,
-                (row_id[0], i)
-                )
-            self.conn.commit()
+        if item['fabric']!= []:
+            for i in item['fabric']:
+                self.cursor.execute(
+                    """
+                    INSERT INTO fabrics(id, fabric)
+                    VALUES(%s, %s)
+                    ON CONFLICT (id, fabric) DO NOTHING
+                    """,
+                    (row_id[0], i)
+                    )
+                self.conn.commit()
         for i in item['garment_type']:
             self.cursor.execute(
                 """
@@ -81,7 +82,10 @@ class PatternSpiderPipeline:
                 )
             self.conn.commit()
         for i in item['sizes']:
-            s_item=[s for s in i.split("-")]
+            if "," in i:
+                s_item=[s for s in i.split(",")]
+            else:
+                s_item=[s for s in i.split("-")]
             for s in s_item:
                 self.cursor.execute(
                    """
@@ -92,7 +96,7 @@ class PatternSpiderPipeline:
                    (row_id[0], s)
                    )
                 self.conn.commit()
-        if item['description'][0]!= None:
+        if item['description']!= []:
             for i in item['description']:
                 self.cursor.execute(
                     """
