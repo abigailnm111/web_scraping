@@ -88,7 +88,7 @@ def fabric_clean(x):
 def sizes_clean(x):
     line=re.sub("Size\sCombinations:",'', x)
     if line== " ":
-        new= None
+        new= [None]
     else:
         new= re.findall('\((.+?)\)', line)
     return new
@@ -102,7 +102,7 @@ def comma_splits(x):
 
 def fabric_output(x):
     new=none_output(x)
-    if new!= []:
+    if new!= [] and new !=None:
         new=comma_splits(x)
     return new
 
@@ -135,6 +135,7 @@ class Pattern(Item):
     #   )
     sizes= Field(
         input_processor= MapCompose(line_clean, sizes_clean),
+        output_processor=Compose(none_output)
         )
     url=Field(
         output_processor= TakeFirst(),
@@ -167,7 +168,7 @@ class PatternsSpider(scrapy.Spider):
             brand='McCalls'
             NAME_SELECTOR= '.productView-title::text'
             ALT_DESCRIPTION_SELECTOR= '.productView-altTitle::text'
-            DESCRIPTION_SELECTOR= '//div[@id="descriptionTab"]//text()' 
+            DESCRIPTION_SELECTOR= '//article[@id="productDescriptionInline"]//text()' 
             FABRIC_SELECTOR= '//div[@id="fabricsTab"]//text()'
             # NOTIONS_SELECTOR= '//div[@id="notionsTab"]//text()'
             SIZE_SELECTOR= '//div[@id="sizeTab"]//text()'
