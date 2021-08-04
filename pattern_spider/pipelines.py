@@ -5,7 +5,7 @@
 
 
 # useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
+
 
 import psycopg2
 
@@ -32,6 +32,10 @@ class PatternSpiderPipeline:
         self.conn.close()
         
     def process_item(self, item, spider):
+        item.setdefault('fabric', [])
+        item.setdefault('garment_type', [])
+        item.setdefault('sizes', [])
+        item.setdefault('description', [])
         self.cursor.execute(
             """
             INSERT INTO pattern(brand, url, name)
@@ -107,7 +111,5 @@ class PatternSpiderPipeline:
                     (row_id[0], i)
                     )
                 self.conn.commit()
-            #fields to add:
-            #description
         return item
     

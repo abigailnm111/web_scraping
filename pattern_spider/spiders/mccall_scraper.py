@@ -16,14 +16,15 @@ import re
 def line_clean(x):
      l1= re.sub(r"\r\n",'', x)
      line=re.sub(r"\n", '', l1)
-     if line==' ':
-         line== None
-     line= line.lstrip(" ")
+     if line==' 'or line=='':
+         line= None
+     else:
+         line= line.lstrip(" ")
      return line
 
 def audiance_determination(x):
     new=[]
-    if re.findall('Misses|Men|Women',x):
+    if re.findall('Misses|Men|Women|Unisex',x):
         new.append('Adult')
     if re.findall('Boy|Girl|Children|Infant|Toddler',x):
         new.append('Children')
@@ -72,14 +73,16 @@ def garment_type_determination(x):
     return new
           
 def fabric_clean(x):
-     line= re.sub("[*].+|FABRICS:|\.",'', x)
+    
+     line= re.sub("[*].+|FABRICS:|\.|Note:",'', x)
      if line== '' or line== ' ':
-         new= None
+         return None
      else:
-        new=re.findall('(.+,.+)', line)
-        if new==[]:
-            new=[None]
-     return new
+        new=re.findall('.+,', line)
+        
+
+            
+        return new
 
 # def notions_clean(x):
 #     line=re.sub("NOTIONS:",'', x)
@@ -97,20 +100,26 @@ def comma_splits(x):
     if type(x)== str:
         new= x.split(', ')
     else:
-        new= [i.split(', ') for i in x]
+        new=[]
+        for n in x:
+            new.append(n.split(', '))
+        #new= [i.split(', ') for i in x]
     return new 
 
 def fabric_output(x):
-    new=none_output(x)
+   # new=none_output(x)
+    new=x
     if new!= [] and new !=None:
         new=comma_splits(x)
+        for n in new:
+            if len(n)>=80:
+                n=None
     return new
 
 
 def none_output(x):
     new=[i for i in x if i!=None]
     return new
-
 
 class Pattern(Item):
     name= Field(
@@ -128,8 +137,9 @@ class Pattern(Item):
         )
     fabric= Field(
         input_processor= MapCompose(line_clean, fabric_clean),
-        output_processor=Compose(lambda v: v[0] if(v[0]!=None)else [None], fabric_output)
+        output_processor=Compose(fabric_output)
         )
+    #lambda v: v[0] if(v[0]!=None)else [None]
     # notions= Field(
     #   input_processor= MapCompose(line_clean),
     #   )
@@ -168,7 +178,7 @@ class PatternsSpider(scrapy.Spider):
             brand='McCalls'
             NAME_SELECTOR= '.productView-title::text'
             ALT_DESCRIPTION_SELECTOR= '.productView-altTitle::text'
-            DESCRIPTION_SELECTOR= '//article[@id="productDescriptionInline"]//text()' 
+            DESCRIPTION_SELECTOR= '//article[@id="descriptionTab"]//text()' 
             FABRIC_SELECTOR= '//div[@id="fabricsTab"]//text()'
             # NOTIONS_SELECTOR= '//div[@id="notionsTab"]//text()'
             SIZE_SELECTOR= '//div[@id="sizeTab"]//text()'
