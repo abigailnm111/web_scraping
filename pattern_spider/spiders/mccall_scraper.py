@@ -74,11 +74,11 @@ def garment_type_determination(x):
           
 def fabric_clean(x):
     
-     line= re.sub("[*].+|FABRICS:|\.|Note:",'', x)
+     line= re.sub("[*].+|FABRICS:|\.|Note:|Fabric requirement allows for nap,",'', x)
      if line== '' or line== ' ':
          return None
      else:
-        new=re.findall('.+,', line)
+        new=re.findall('.+,.+|.+', line)
         
 
             
@@ -98,22 +98,24 @@ def sizes_clean(x):
 
 def comma_splits(x):
     if type(x)== str:
-        new= x.split(', ')
+        new= x.split(',')
+        for n in new:
+            n=n.strip()
     else:
         new=[]
         for n in x:
-            new.append(n.split(', '))
+            new.append([i.strip() for i in n.split(',')])
+            
         #new= [i.split(', ') for i in x]
     return new 
 
 def fabric_output(x):
    # new=none_output(x)
-    new=x
-    if new!= [] and new !=None:
-        new=comma_splits(x)
-        for n in new:
-            if len(n)>=80:
-                n=None
+    new=comma_splits(x)
+    for n in new:
+        for i in n:
+             if len(i)>79 or len(i)<3:
+                 n.remove(i)
     return new
 
 

@@ -66,15 +66,16 @@ class PatternSpiderPipeline:
             self.conn.commit()
         if item['fabric']!= []:
             for i in item['fabric']:
-                self.cursor.execute(
-                    """
-                    INSERT INTO fabrics(id, fabric)
-                    VALUES(%s, %s)
-                    ON CONFLICT (id, fabric) DO NOTHING
-                    """,
-                    (row_id[0], i)
-                    )
-                self.conn.commit()
+                for x in i:
+                    self.cursor.execute(
+                        """
+                        INSERT INTO fabrics(id, fabric)
+                        VALUES(%s, %s)
+                        ON CONFLICT (id, fabric) DO NOTHING
+                        """,
+                        (row_id[0], x)
+                        )
+                    self.conn.commit()
         for i in item['garment_type']:
             self.cursor.execute(
                 """
