@@ -16,7 +16,6 @@ user= 'postgres',
 password= 'clown')
 
 
-
 class PatternSpiderPipeline:
     
     def open_spider(self, spider):
@@ -67,15 +66,16 @@ class PatternSpiderPipeline:
         if item['fabric']!= []:
             for i in item['fabric']:
                 for x in i:
-                    self.cursor.execute(
-                        """
-                        INSERT INTO fabrics(id, fabric)
-                        VALUES(%s, %s)
-                        ON CONFLICT (id, fabric) DO NOTHING
-                        """,
-                        (row_id[0], x)
-                        )
-                    self.conn.commit()
+                    if len(x)<79 and len(x)>3:
+                        self.cursor.execute(
+                            """
+                            INSERT INTO fabrics(id, fabric)
+                            VALUES(%s, %s)
+                            ON CONFLICT (id, fabric) DO NOTHING
+                            """,
+                            (row_id[0], x)
+                            )
+                        self.conn.commit()
         for i in item['garment_type']:
             self.cursor.execute(
                 """

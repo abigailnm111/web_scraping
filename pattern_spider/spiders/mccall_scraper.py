@@ -74,7 +74,7 @@ def garment_type_determination(x):
           
 def fabric_clean(x):
     
-     line= re.sub("[*].+|FABRICS:|\.|Note:|Fabric requirement allows for nap,",'', x)
+     line= re.sub("[*].+|FABRICS:|\.|Note:|Fabric requirement allows for nap|Contrast,",'', x)
      if line== '' or line== ' ':
          return None
      else:
@@ -105,27 +105,26 @@ def comma_splits(x):
         new=[]
         for n in x:
             new.append([i.strip() for i in n.split(',')])
-            
-        #new= [i.split(', ') for i in x]
     return new 
 
 def fabric_output(x):
-   # new=none_output(x)
+
     new=comma_splits(x)
-    for n in new:
-        for i in n:
-             if len(i)>79 or len(i)<3:
-                 n.remove(i)
     return new
 
+def name_clean(x):
+    name= re.sub("\(Digital\)",'', x).rstrip()
+    return name
 
 def none_output(x):
     new=[i for i in x if i!=None]
+    
     return new
 
 class Pattern(Item):
     name= Field(
-        output_processor=TakeFirst(),
+        input_processor= MapCompose(name_clean),
+        output_processor=TakeFirst()
         )
     audiance=Field(
         input_processor= MapCompose(line_clean, audiance_determination),
@@ -180,7 +179,7 @@ class PatternsSpider(scrapy.Spider):
             brand='McCalls'
             NAME_SELECTOR= '.productView-title::text'
             ALT_DESCRIPTION_SELECTOR= '.productView-altTitle::text'
-            DESCRIPTION_SELECTOR= '//article[@id="descriptionTab"]//text()' 
+            DESCRIPTION_SELECTOR= '//*[@id="descriptionTab"]//text()' 
             FABRIC_SELECTOR= '//div[@id="fabricsTab"]//text()'
             # NOTIONS_SELECTOR= '//div[@id="notionsTab"]//text()'
             SIZE_SELECTOR= '//div[@id="sizeTab"]//text()'
