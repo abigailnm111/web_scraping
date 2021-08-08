@@ -12,6 +12,13 @@ from itemloaders.processors import TakeFirst, MapCompose, Compose
 
 import re
 
+def category_search(x, type_dict):
+    categories=[]
+    for key in type_dict:
+        if re.findall(type_dict[key],x):
+            if key not in categories:
+                categories.append(key)
+    return categories
 
 def line_clean(x):
      l1= re.sub(r"\r\n",'', x)
@@ -23,13 +30,11 @@ def line_clean(x):
      return line
 
 def audiance_determination(x):
-    new=[]
-    if re.findall('Misses|Men|Women|Unisex',x):
-        new.append('Adult')
-    if re.findall('Boy|Girl|Children|Infant|Toddler',x):
-        new.append('Children')
-    if re.findall('Petite',x):
-        new.append("Petite")
+    audiance_types={'Adult':'Misses|Men|Women|Unisex', 
+                    'Children': 'Boy|Girl|Children|Infant|Toddler',
+                    'Petite':"Petite",
+                    }
+    new=category_search(x, audiance_types)
     if new==[]:
         new.append('Unknown')
     return new
@@ -49,25 +54,18 @@ def garment_features(x):
    return new
 
 def garment_type_determination(x):
-    new=[]
-    if re.findall('Top|Blouse|Tunic|Shirt',x):
-        new.append("Top")
-    if re.findall('Dress',x):
-        new.append("Dress")
-    if re.findall("Shorts",x):
-        new.append("Shorts")
-    if re.findall("Pants|Legging",x):
-        new.append("Pants")
-    if re.findall("Skirt",x):
-        new.append("Skirt")
-    if re.findall("Vest", x):
-        new.append("Vest")
-    if re.findall("Cardigan|Sweater",x):
-        new.append("Cardigan/Sweater")
-    if re.findall("Jacket|Coat|Hoodie|Poncho",x):
-        new.append("Jacket/Coat")
-    if re.findall("Jumpsuit|Romper|Overalls",x):
-        new.append("Jumpsuit/Romper/Overalls")
+    garment_types={"Top":'Top|Blouse|Tunic|Shirt',
+                   "Dress": "Dress",
+                   "Shorts": "Shorts",
+                   "Pants": "Pants|Legging",
+                   "Skirt": "Skirt",
+                   "Vest": "Vest",
+                   "Cardigan/Sweater": "Cardigan|Sweater",
+                   "Jacket/Coat": "Jacket|Coat|Hoodie|Poncho",
+                   "Jumpsuit/Romper/Overalls":"Jumpsuit|Romper|Overalls"
+                   }
+    new=category_search(x, garment_types)
+
     if new==[]:
         new.append("Not Available")
     return new
@@ -79,9 +77,6 @@ def fabric_clean(x):
          return None
      else:
         new=re.findall('.+,.+|.+', line)
-        
-
-            
         return new
 
 # def notions_clean(x):

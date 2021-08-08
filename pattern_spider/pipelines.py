@@ -16,28 +16,24 @@ database= 'patterndb',
 user= 'postgres',
 password= 'clown')
 
-import re
+
 
 x= 'Medium-Weight Two-Way Stretch Knits: Swimwear Knits'
 def get_fabric_type(x):
     fab_type=[]
-    types={"Stretch/Knit":["Jersey", "Knit", "Stretch", "Interlock"], 
-           "Denim/Canvas":["Denim", "Jean", "Canvas"], 
-           "Leather/Suede/Fur":["Leather", "Suede", "Fur"],
-           "NonStretch/Woven":["Woven","Challis","Crepe", "Chiffon","Gingham", "Poplin", "Linen", 
-                               "Charmeuse", "Taffeta", "Silk", "Satiin", "Broadcloth", "Gabardine"
-                               "Batiste", "Brocade", "Tweed", "Velvet", "Lace","Lawn", "Poplin"
-                               "Seersucker","Twill"
-                               ]
+    types={"Stretch/Knit":"Jersey|Knit|Stretch|Interlock|Tricot", 
+           "Denim/Canvas":"Denim|Jean|Canvas", 
+           "Leather/Suede/Fur":"Leather|Suede|Fur",
+           "Sheer/Lace":"Sheer|Lace|Mesh|Overlay",
+           "NonStretch/Woven":"Woven|Challis|Crepe|Chiffon|Gingham|Poplin|Linen|" 
+                               "Charmeuse|Taffeta|Silk|Satiin|Broadcloth|Gabardine"
+                               "Batiste|Brocade|Tweed|Velvet|Lace|Lawn|Poplin"
+                               "Seersucker|Twill"                      
            }
-    
-    for t in types:
-        for value in types[t]:
-
-            if re.findall(value,x):
-                if t not in fab_type:
-                    fab_type.append(t)
-
+    for key in types:
+        if re.findall(types[key],x):
+            if key not in fab_type:
+                fab_type.append(key)
     return fab_type
 
 class PatternSpiderPipeline:
@@ -92,27 +88,25 @@ class PatternSpiderPipeline:
                 for x in i:
                     if len(x)<79 and len(x)>3:
                         fabric_type=get_fabric_type(x)
-                        if len(fabric_type)>1:
-                            for f_type in fabric_type:
-                                self.cursor.execute(
-                                    """
-                                    INSERT INTO fabrics(id, fabric, fabric_type)
-                                    VALUES(%s, %s, %s)
-                                    ON CONFLICT (id, fabric) DO NOTHING
-                                    """,
-                                    (row_id[0], x, fabric_type)
-                                    )
-                                self.conn.commit()
-                            else:
-                                self.cursor.execute(
-                                    """
-                                    INSERT INTO fabrics(id, fabric, fabric_type)
-                                    VALUES(%s, %s, %s)
-                                    ON CONFLICT (id, fabric) DO NOTHING
-                                    """,
-                                    (row_id[0], x, fabric_type)
-                                    )
-                                self.conn.commit()
+                        self.cursor.execute(
+                            """
+                            INSERT INTO fabrics(id, fabric)
+                            VALUES(%s, %s)
+                            ON CONFLICT (id, fabric) DO NOTHING
+                            """,
+                            (row_id[0], x)
+                            )
+                        self.conn.commit()
+            for f_type in fabric_type:
+                self.cursor.execute(
+                    """
+                    INSERT INTO fabric_type(id, fabric_type)
+                    VALUES(%s, %s)
+                    ON CONFLICT (id, fabric_type) DO NOTHING
+                    """,
+                    (row_id[0], f_type)
+                    )
+                self.conn.commit()
         for i in item['garment_type']:
             self.cursor.execute(
                 """
