@@ -26,7 +26,7 @@ def get_fabric_type(x):
            "Leather/Suede/Fur":"Leather|Suede|Fur",
            "Sheer/Lace":"Sheer|Lace|Mesh|Overlay",
            "NonStretch/Woven":"Woven|Challis|Crepe|Chiffon|Gingham|Poplin|Linen|" 
-                               "Charmeuse|Taffeta|Silk|Satiin|Broadcloth|Gabardine"
+                               "Charmeuse|Taffeta|Silk|Satiin|Broadcloth|Gabardine|"
                                "Batiste|Brocade|Tweed|Velvet|Lace|Lawn|Poplin"
                                "Seersucker|Twill|Velvet|Ripstop|Jacquard|Voile"                      
            }
@@ -91,6 +91,17 @@ class PatternSpiderPipeline:
                     if len(x)<79 and len(x)>3:
                         type_search= get_fabric_type(x)
                         fabric_type=[x for x in type_search if x not in fabric_type]
+                        for f_type in fabric_type:
+                            for f in f_type:
+                                self.cursor.execute(
+                                    """
+                                    INSERT INTO fabric_type(id, fabric_type)
+                                    VALUES(%s, %s)
+                                    ON CONFLICT (id, fabric_type) DO NOTHING
+                                    """,
+                                    (row_id[0], f_type)
+                                    )
+                                self.conn.commit()
                         self.cursor.execute(
                             """
                             INSERT INTO fabrics(id, fabric)
@@ -100,17 +111,7 @@ class PatternSpiderPipeline:
                             (row_id[0], x)
                             )
                         self.conn.commit()
-            for f_type in fabric_type:
-                for f in f_type:
-                    self.cursor.execute(
-                        """
-                        INSERT INTO fabric_type(id, fabric_type)
-                        VALUES(%s, %s)
-                        ON CONFLICT (id, fabric_type) DO NOTHING
-                        """,
-                        (row_id[0], f_type)
-                        )
-                    self.conn.commit()
+            
         for i in item['garment_type']:
             self.cursor.execute(
                 """
