@@ -103,7 +103,6 @@ def comma_splits(x):
     return new 
 
 def fabric_output(x):
-
     new=comma_splits(x)
     return new
 
@@ -113,7 +112,6 @@ def name_clean(x):
 
 def none_output(x):
     new=[i for i in x if i!=None]
-    
     return new
 
 class Pattern(Item):
@@ -150,7 +148,6 @@ class Pattern(Item):
         output_processor=TakeFirst(),
         )
     
-
 class PatternsSpider(scrapy.Spider):
     name ='pattern_spider'
     start_urls=['https://somethingdelightful.com/mccalls/misses']
@@ -159,9 +156,7 @@ class PatternsSpider(scrapy.Spider):
         find_category=response.css('div.category__subcat-grid-item a::attr(href)').getall()
         for c in find_category:
             yield scrapy.Request(c, callback=self.category_parse)
-            
-        
-        
+             
     def category_parse(self, response):
         find_pattern= response.css('h4.card-title a::attr(href)').getall()
         for pattern in find_pattern: 
@@ -191,10 +186,5 @@ class PatternsSpider(scrapy.Spider):
             return p.load_item()
             
 
-#<article id="productDescriptionInline">
-# sub sections of article above: id="descriptionTab" id="fabricsTab" id="notionsTab" id="sizeTab"
 
-# span class="sewing-rating">
-
-#div class="form-field option--size"#product-listing-container > 
 

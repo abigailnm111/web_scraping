@@ -18,7 +18,7 @@ def solution(s):
             x=len(pattern)
             servings= int(len(s)/len(pattern))
             
-            for slice in range(2,servings):
+            for slice in range(1,servings):
                 print(s[slice*x:slice*x+x])
 
                 if pattern!= s[slice*x:slice*x+x]:
